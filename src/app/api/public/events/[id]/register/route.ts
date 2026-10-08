@@ -6,18 +6,18 @@ import { eventRegistrationSchema } from '@/validators';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
     
     // Validate request body
-    const validatedData = eventRegistrationSchema.parse({ ...body, eventId: params.id });
+    const validatedData = eventRegistrationSchema.parse({ ...body, eventId: (await params).id });
 
     await dbConnect();
 
     // Check if event exists and is open
-    const event = await Event.findById(params.id);
+    const event = await Event.findById((await params).id);
     if (!event) {
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
     }
@@ -27,13 +27,13 @@ export async function POST(
     }
 
     // Check seat limit
-    const currentRegistrations = await EventRegistration.countDocuments({ eventId: params.id });
+    const currentRegistrations = await EventRegistration.countDocuments({ eventId: (await params).id });
     if (currentRegistrations >= event.seatLimit) {
       return NextResponse.json({ success: false, error: 'Event is fully booked' }, { status: 400 });
     }
 
     // Check if user already registered for this event
-    const existingReg = await EventRegistration.findOne({ email: validatedData.email, eventId: params.id });
+    const existingReg = await EventRegistration.findOne({ email: validatedData.email, eventId: (await params).id });
     if (existingReg) {
       return NextResponse.json({ success: false, error: 'You are already registered for this event' }, { status: 400 });
     }

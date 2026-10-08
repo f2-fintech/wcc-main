@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db';
 import { JoinRequest } from '@/models/JoinRequest';
 import { Doctor } from '@/models/Doctor';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await request.json();
