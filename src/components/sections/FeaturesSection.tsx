@@ -7,27 +7,27 @@ const features = [
   {
     title: "Financial Conversations",
     desc: "Understand important financial concepts, ask questions and gain perspectives from professionals who work in the financial ecosystem.",
-    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba68eadd15b40670e6090f/photos/d61c3869-e468-4ed7-b63a-1fd72e365275.JPG?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6ODU4552724GKCIJ%2F20261008%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20261008T064919Z&X-Amz-Expires=3600&X-Amz-Signature=0ee3286bd3e5b7cae6cc4b1af67ba416bb4be7f485946d4497a9fe028b057d45&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba68eadd15b40670e6090f/photos/d61c3869-e468-4ed7-b63a-1fd72e365275.JPG"
   },
   {
     title: "Doctor-to-Doctor Networking",
     desc: "Meet fellow doctors, exchange experiences and build relationships with people who understand your professional journey.",
-    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba6895dd15b40670e608f0/photos/6f788fe0-9b3e-4083-b75a-03c96b7ce8fa.JPG?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6ODU4552724GKCIJ%2F20261008%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20261008T064953Z&X-Amz-Expires=3600&X-Amz-Signature=3c3b4558e905952c8111a3856e628a3a7d25b6d61af470143414e7d1d88a59f3&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba6895dd15b40670e608f0/photos/6f788fe0-9b3e-4083-b75a-03c96b7ce8fa.JPG"
   },
   {
     title: "Knowledge Sessions",
     desc: "Hear from experienced professionals and experts on subjects relevant to life beyond medicine.",
-    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba68eadd15b40670e6090f/photos/15104109-6cba-47a2-a1d9-8916d22b577a.JPG?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6ODU4552724GKCIJ%2F20261008%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20261008T064919Z&X-Amz-Expires=3600&X-Amz-Signature=9a7c7d218b00e0de08cb3309f151d9f8759e8c9e11a6a39aab812dcec08cde4e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba68eadd15b40670e6090f/photos/15104109-6cba-47a2-a1d9-8916d22b577a.JPG"
   },
   {
     title: "Meaningful Conversations",
     desc: "No rigid agenda. No unnecessary formality. Just relevant conversations, useful insights and an opportunity to learn something new.",
-    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba68cddd15b40670e60906/photos/e6da52a0-ade6-4b0c-94f6-de471d9e5305.JPG?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6ODU4552724GKCIJ%2F20261008%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20261008T064953Z&X-Amz-Expires=3600&X-Amz-Signature=359e401efb21a887557388a6b3a570a2f5026bff3613838ad00c7a7b86c25098&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba68cddd15b40670e60906/photos/e6da52a0-ade6-4b0c-94f6-de471d9e5305.JPG"
   },
   {
     title: "Community Experiences",
     desc: "Every edition is an opportunity to meet new people, reconnect with peers and become part of something bigger.",
-    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba6893dd15b40670e608d4/photos/e176366b-38bf-499f-98ee-e478e63d6497.JPG?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6ODU4552724GKCIJ%2F20261008%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20261008T065500Z&X-Amz-Expires=3600&X-Amz-Signature=d76b40b001f51f7c7489f8124df1da20ac50e32ba99eefa3443be509ad69775b&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+    image: "https://f2fintech-hrms.s3.eu-north-1.amazonaws.com/event-pics/6aba52be784100b388f2e1d1/media/6aba52be784100b388f2e1d2/6aba6893dd15b40670e608d4/photos/e176366b-38bf-499f-98ee-e478e63d6497.JPG"
   }
 ];
 
