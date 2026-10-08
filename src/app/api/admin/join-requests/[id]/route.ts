@@ -22,10 +22,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         await Doctor.create({
           name: joinRequest.name,
           slug: joinRequest.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          specialization: joinRequest.specialty,
+          specialization: (joinRequest as any).specialty || 'General',
           city: joinRequest.city,
           state: 'Unknown',
-          hospital: joinRequest.workplace,
+          hospital: (joinRequest as any).workplace || 'Hospital',
           experienceYears: 0,
           qualifications: 'Doctor',
           bio: 'Welcome to White Coat Club.',
