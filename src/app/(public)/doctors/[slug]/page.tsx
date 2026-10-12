@@ -13,6 +13,9 @@ async function getDoctor(slug: string) {
   return JSON.parse(JSON.stringify(doc));
 }
 
+// Next.js 16: Allow blocking route at request time for dynamic parameters and DB lookup
+export const instant = false;
+
 export default async function DoctorProfile({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const doctor = await getDoctor(slug);
