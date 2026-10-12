@@ -111,9 +111,9 @@ export default function EventsAdmin() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-serif text-primary">Events</h1>
-        <Button onClick={() => handleOpenModal()} className="gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-serif text-primary">Events</h1>
+        <Button onClick={() => handleOpenModal()} className="gap-2 w-full sm:w-auto justify-center">
           <Plus className="w-4 h-4" /> Add Event
         </Button>
       </div>

@@ -13,20 +13,41 @@ export async function POST(request: Request) {
 
     const contactMessage = await ContactMessage.create(validatedData);
 
-    // Send email notification to admin (optional)
-    await sendEmail({
-      to: process.env.EMAIL_SERVER_USER || 'admin@whitecoatclub.com', // Admin email
-      subject: `New Contact Request: ${validatedData.subject}`,
-      html: `
-        <h3>New Contact Message</h3>
-        <p><strong>Name:</strong> ${validatedData.name}</p>
-        <p><strong>Email:</strong> ${validatedData.email}</p>
-        <p><strong>Phone:</strong> ${validatedData.phone}</p>
-        <p><strong>Subject:</strong> ${validatedData.subject}</p>
-        <p><strong>Message:</strong></p>
-        <p>${validatedData.message}</p>
-      `,
-    });
+    // Send confirmation email to the user (informing their query is received)
+    try {
+      await sendEmail({
+        to: validatedData.email,
+        subject: `We've received your message - White Coat Club`,
+        html: `
+          <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
+            <div style="border-bottom: 2px solid #C5A880; padding-bottom: 16px; margin-bottom: 20px;">
+              <h2 style="color: #0A192F; margin: 0; font-size: 22px; font-weight: 700;">The White Coat Club</h2>
+            </div>
+            <p style="font-size: 16px; color: #1f2937; margin-bottom: 16px;">Dear <strong>${validatedData.name}</strong>,</p>
+            <p style="font-size: 15px; color: #4b5563; line-height: 1.6;">
+              Thank you for reaching out to us. We have received your query regarding <strong>"${validatedData.subject}"</strong>.
+            </p>
+            <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 20px 0;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #0A192F;">Query Summary:</p>
+              <p style="margin: 4px 0; font-size: 14px; color: #4b5563;"><strong>Subject:</strong> ${validatedData.subject}</p>
+              <p style="margin: 4px 0; font-size: 14px; color: #4b5563;"><strong>Message:</strong></p>
+              <p style="margin: 6px 0 0 0; font-size: 14px; color: #374151; white-space: pre-wrap; background: #ffffff; padding: 10px; border-radius: 6px; border: 1px solid #e5e7eb;">${validatedData.message}</p>
+            </div>
+            <p style="font-size: 15px; color: #4b5563; line-height: 1.6;">
+              Our team will review your message and get back to you shortly.
+            </p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+            <p style="font-size: 13px; color: #9ca3af; margin: 0;">
+              Warm regards,<br />
+              <strong style="color: #0A192F;">White Coat Club Team</strong><br />
+              Mumbai, India &bull; <a href="mailto:contact@whitecoatclub.com" style="color: #C5A880; text-decoration: none;">contact@whitecoatclub.com</a>
+            </p>
+          </div>
+        `,
+      });
+    } catch (mailError) {
+      console.error('Failed to send user confirmation email:', mailError);
+    }
 
     return NextResponse.json({ success: true, data: contactMessage }, { status: 201 });
   } catch (error: any) {

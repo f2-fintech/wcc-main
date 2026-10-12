@@ -32,7 +32,7 @@ export default function JoinRequestsAdmin() {
 
   return (
     <div>
-      <h1 className="text-3xl font-serif text-primary mb-8">Pending Join Requests</h1>
+      <h1 className="text-2xl sm:text-3xl font-serif text-primary mb-6 md:mb-8">Pending Join Requests</h1>
       
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">

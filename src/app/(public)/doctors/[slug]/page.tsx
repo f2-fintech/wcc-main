@@ -5,8 +5,6 @@ import { MapPin, Stethoscope, GraduationCap, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
-export const instant = false;
-
 async function getDoctor(slug: string) {
   await dbConnect();
   const doc = await Doctor.findOne({ slug, isPublished: true }).lean();
