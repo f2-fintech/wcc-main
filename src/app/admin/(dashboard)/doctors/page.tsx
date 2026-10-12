@@ -36,6 +36,7 @@ export default function DoctorsAdmin() {
       setEditingDoctor(doc);
       setFormData({
         ...doc,
+        experienceYears: doc.experienceYears || 0,
         socialLinks: doc.socialLinks || { linkedin: "" }
       });
     } else {
@@ -47,6 +48,19 @@ export default function DoctorsAdmin() {
       });
     }
     setIsModalOpen(true);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    setFormData((prev) => {
+      const isAutoSlug = !editingDoctor && (!prev.slug || prev.slug === prev.name.toLowerCase().replace(/^dr\.?\s*/i, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
+      const autoSlug = newName.toLowerCase().replace(/^dr\.?\s*/i, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      return {
+        ...prev,
+        name: newName,
+        slug: isAutoSlug ? autoSlug : prev.slug,
+      };
+    });
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,16 +83,28 @@ export default function DoctorsAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      alert("Doctor name is required");
+      return;
+    }
+
     setLoading(true);
 
     const url = editingDoctor ? `/api/admin/doctors/${editingDoctor._id}` : "/api/admin/doctors";
     const method = editingDoctor ? "PUT" : "POST";
 
+    const finalSlug = formData.slug?.trim() || formData.name.toLowerCase().replace(/^dr\.?\s*/i, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `doctor-${Date.now()}`;
+    const payload = {
+      ...formData,
+      slug: finalSlug,
+      experienceYears: Number(formData.experienceYears) || 0,
+    };
+
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) {
@@ -142,8 +168,10 @@ export default function DoctorsAdmin() {
                     <div className="font-medium text-primary">Dr. {doc.name}</div>
                     <div className="text-xs text-gray-400">/{doc.slug}</div>
                   </td>
-                  <td className="p-4 text-sm">{doc.specialization}</td>
-                  <td className="p-4 text-sm">{doc.city}, {doc.state}</td>
+                  <td className="p-4 text-sm text-gray-600">{doc.specialization || "—"}</td>
+                  <td className="p-4 text-sm text-gray-600">
+                    {doc.city || doc.state ? [doc.city, doc.state].filter(Boolean).join(", ") : "—"}
+                  </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${doc.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                       {doc.isPublished ? "Published" : "Draft"}
@@ -178,65 +206,130 @@ export default function DoctorsAdmin() {
                </div>
             )}
             <div>
-              <Label htmlFor="photo" className="block mb-2">Profile Photo</Label>
+              <Label htmlFor="photo" className="block mb-2">Profile Photo (Optional)</Label>
               <Input id="photo" type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name (without Dr.)</Label>
-              <Input id="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="name">Full Name (without Dr.) <span className="text-red-500">*</span></Label>
+              <Input 
+                id="name" 
+                value={formData.name} 
+                onChange={handleNameChange} 
+                placeholder="e.g. Ramesh Kumar"
+                required 
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug (URL)</Label>
-              <Input id="slug" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="slug">Slug (Auto-generated if empty)</Label>
+              <Input 
+                id="slug" 
+                value={formData.slug} 
+                onChange={e => setFormData({...formData, slug: e.target.value})} 
+                placeholder="e.g. ramesh-kumar"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="specialization">Specialization</Label>
-              <Input id="specialization" value={formData.specialization} onChange={e => setFormData({...formData, specialization: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="specialization">Specialization (Optional)</Label>
+              <Input 
+                id="specialization" 
+                value={formData.specialization} 
+                onChange={e => setFormData({...formData, specialization: e.target.value})} 
+                placeholder="e.g. Cardiologist"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="qualifications">Qualifications (e.g. MBBS, MD)</Label>
-              <Input id="qualifications" value={formData.qualifications} onChange={e => setFormData({...formData, qualifications: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="qualifications">Qualifications (Optional)</Label>
+              <Input 
+                id="qualifications" 
+                value={formData.qualifications} 
+                onChange={e => setFormData({...formData, qualifications: e.target.value})} 
+                placeholder="e.g. MBBS, MD"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="hospital">Hospital / Clinic</Label>
-              <Input id="hospital" value={formData.hospital} onChange={e => setFormData({...formData, hospital: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="hospital">Hospital / Clinic (Optional)</Label>
+              <Input 
+                id="hospital" 
+                value={formData.hospital} 
+                onChange={e => setFormData({...formData, hospital: e.target.value})} 
+                placeholder="e.g. Fortis Hospital"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="experienceYears">Experience (Years)</Label>
-              <Input id="experienceYears" type="number" value={formData.experienceYears} onChange={e => setFormData({...formData, experienceYears: Number(e.target.value)})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="experienceYears">Experience in Years (Optional)</Label>
+              <Input 
+                id="experienceYears" 
+                type="number" 
+                min="0"
+                value={formData.experienceYears === 0 && !editingDoctor ? "" : formData.experienceYears} 
+                onChange={e => setFormData({...formData, experienceYears: e.target.value === "" ? 0 : Number(e.target.value)})} 
+                placeholder="0"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input id="city" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="city">City (Optional)</Label>
+              <Input 
+                id="city" 
+                value={formData.city} 
+                onChange={e => setFormData({...formData, city: e.target.value})} 
+                placeholder="e.g. New Delhi"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Input id="state" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} required />
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label htmlFor="state">State (Optional)</Label>
+              <Input 
+                id="state" 
+                value={formData.state} 
+                onChange={e => setFormData({...formData, state: e.target.value})} 
+                placeholder="e.g. Delhi"
+              />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea id="bio" rows={4} value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} required />
+              <Label htmlFor="bio">Bio (Optional)</Label>
+              <Textarea 
+                id="bio" 
+                rows={3} 
+                value={formData.bio} 
+                onChange={e => setFormData({...formData, bio: e.target.value})} 
+                placeholder="Brief profile summary (optional)..."
+              />
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label htmlFor="email">Email Address (Optional)</Label>
-              <Input id="email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+              <Input 
+                id="email" 
+                type="email" 
+                value={formData.email} 
+                onChange={e => setFormData({...formData, email: e.target.value})} 
+                placeholder="doctor@example.com"
+              />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label htmlFor="phone">Phone Number (Optional)</Label>
-              <Input id="phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+              <Input 
+                id="phone" 
+                value={formData.phone} 
+                onChange={e => setFormData({...formData, phone: e.target.value})} 
+                placeholder="+91 98765 43210"
+              />
             </div>
             <div className="space-y-2 col-span-2">
               <Label htmlFor="linkedin">LinkedIn URL (Optional)</Label>
-              <Input id="linkedin" value={formData.socialLinks.linkedin} onChange={e => setFormData({...formData, socialLinks: { linkedin: e.target.value }})} />
+              <Input 
+                id="linkedin" 
+                value={formData.socialLinks.linkedin} 
+                onChange={e => setFormData({...formData, socialLinks: { linkedin: e.target.value }})} 
+                placeholder="https://linkedin.com/in/..."
+              />
             </div>
 
             <div className="flex items-center gap-2 mt-4 col-span-2">
-              <input type="checkbox" id="isPublished" checked={formData.isPublished} onChange={e => setFormData({...formData, isPublished: e.target.checked})} className="w-4 h-4" />
-              <Label htmlFor="isPublished">Publish to Public Directory</Label>
+              <input type="checkbox" id="isPublished" checked={formData.isPublished} onChange={e => setFormData({...formData, isPublished: e.target.checked})} className="w-4 h-4 cursor-pointer" />
+              <Label htmlFor="isPublished" className="cursor-pointer">Publish to Public Directory</Label>
             </div>
           </div>
           

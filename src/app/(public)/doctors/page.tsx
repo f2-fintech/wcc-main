@@ -100,13 +100,17 @@ export default function DoctorDirectory() {
                     </div>
                     <CardContent className="p-6">
                       <h3 className="font-serif text-2xl font-bold text-primary mb-1">Dr. {doctor.name}</h3>
-                      <p className="text-accent font-medium mb-4">{doctor.specialization}</p>
+                      {doctor.specialization && (
+                        <p className="text-accent font-medium mb-3">{doctor.specialization}</p>
+                      )}
                       
-                      <div className="space-y-2 text-sm text-primary/70">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" /> {doctor.hospital}, {doctor.city}
+                      {(doctor.hospital || doctor.city) && (
+                        <div className="space-y-2 text-sm text-primary/70 mt-2">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 shrink-0" /> {[doctor.hospital, doctor.city].filter(Boolean).join(", ")}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </CardContent>
                   </Card>
                 </Link>

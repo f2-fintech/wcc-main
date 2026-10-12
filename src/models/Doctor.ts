@@ -4,13 +4,13 @@ export interface IDoctor extends Document {
   name: string;
   slug: string;
   photoUrl?: string;
-  specialization: string;
-  qualifications: string;
-  hospital: string;
-  city: string;
-  state: string;
-  experienceYears: number;
-  bio: string;
+  specialization?: string;
+  qualifications?: string;
+  hospital?: string;
+  city?: string;
+  state?: string;
+  experienceYears?: number;
+  bio?: string;
   email?: string;
   phone?: string;
   socialLinks?: {
@@ -25,18 +25,18 @@ const DoctorSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
-    photoUrl: { type: String },
-    specialization: { type: String, required: true },
-    qualifications: { type: String, required: true },
-    hospital: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    experienceYears: { type: Number, required: true },
-    bio: { type: String, required: true },
-    email: { type: String },
-    phone: { type: String },
+    photoUrl: { type: String, default: "" },
+    specialization: { type: String, default: "" },
+    qualifications: { type: String, default: "" },
+    hospital: { type: String, default: "" },
+    city: { type: String, default: "" },
+    state: { type: String, default: "" },
+    experienceYears: { type: Number, default: 0 },
+    bio: { type: String, default: "" },
+    email: { type: String, default: "" },
+    phone: { type: String, default: "" },
     socialLinks: {
-      linkedin: { type: String },
+      linkedin: { type: String, default: "" },
     },
     isPublished: { type: Boolean, default: false },
   },

@@ -42,41 +42,55 @@ export default async function DoctorProfile({ params }: { params: Promise<{ slug
             
             <div className="md:col-span-2 p-10 md:p-16">
               <h1 className="font-serif text-4xl md:text-5xl text-primary mb-2">Dr. {doctor.name}</h1>
-              <p className="text-xl text-accent font-medium mb-8">{doctor.specialization}</p>
+              {doctor.specialization && (
+                <p className="text-xl text-accent font-medium mb-8">{doctor.specialization}</p>
+              )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                <div className="flex items-start gap-3 text-primary/70">
-                  <MapPin className="w-5 h-5 text-accent shrink-0 mt-1" />
-                  <div>
-                    <strong className="block text-primary">Current Hospital/Clinic</strong>
-                    {doctor.hospital}<br />
-                    {doctor.city}, {doctor.state}
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3 text-primary/70">
-                  <GraduationCap className="w-5 h-5 text-accent shrink-0 mt-1" />
-                  <div>
-                    <strong className="block text-primary">Qualifications</strong>
-                    {doctor.qualifications}
-                  </div>
-                </div>
+              {(doctor.hospital || doctor.city || doctor.state || doctor.qualifications || (doctor.experienceYears && doctor.experienceYears > 0)) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                  {(doctor.hospital || doctor.city || doctor.state) && (
+                    <div className="flex items-start gap-3 text-primary/70">
+                      <MapPin className="w-5 h-5 text-accent shrink-0 mt-1" />
+                      <div>
+                        <strong className="block text-primary">Current Hospital/Clinic</strong>
+                        {doctor.hospital && <span>{doctor.hospital}<br /></span>}
+                        {[doctor.city, doctor.state].filter(Boolean).join(", ")}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {doctor.qualifications && (
+                    <div className="flex items-start gap-3 text-primary/70">
+                      <GraduationCap className="w-5 h-5 text-accent shrink-0 mt-1" />
+                      <div>
+                        <strong className="block text-primary">Qualifications</strong>
+                        {doctor.qualifications}
+                      </div>
+                    </div>
+                  )}
 
-                <div className="flex items-start gap-3 text-primary/70">
-                  <Clock className="w-5 h-5 text-accent shrink-0 mt-1" />
-                  <div>
-                    <strong className="block text-primary">Experience</strong>
-                    {doctor.experienceYears} Years
-                  </div>
+                  {Boolean(doctor.experienceYears && doctor.experienceYears > 0) && (
+                    <div className="flex items-start gap-3 text-primary/70">
+                      <Clock className="w-5 h-5 text-accent shrink-0 mt-1" />
+                      <div>
+                        <strong className="block text-primary">Experience</strong>
+                        {doctor.experienceYears} Years
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               <div className="pt-8 border-t border-gray-100">
                 <h3 className="font-serif text-2xl text-primary mb-4">About Dr. {doctor.name}</h3>
                 <div className="text-primary/70 leading-relaxed space-y-4">
-                  {doctor.bio.split('\n').map((para: string, i: number) => (
-                    <p key={i}>{para}</p>
-                  ))}
+                  {doctor.bio ? (
+                    doctor.bio.split('\n').filter(Boolean).map((para: string, i: number) => (
+                      <p key={i}>{para}</p>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">Member of the White Coat Club community.</p>
+                  )}
                 </div>
               </div>
               
