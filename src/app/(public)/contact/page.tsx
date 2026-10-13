@@ -61,15 +61,21 @@ export default function ContactPage() {
             <div className="space-y-6 text-white/70">
               <div>
                 <strong className="block text-white mb-1">Email</strong>
-                contact@whitecoatclub.com
+                <a href="mailto:marketing@f2fintech.com" className="hover:text-accent transition-colors">
+                  marketing@f2fintech.com
+                </a>
               </div>
               <div>
                 <strong className="block text-white mb-1">Phone</strong>
-                +91 98765 43210
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <a href="tel:8981635694" className="hover:text-accent transition-colors">8981635694</a>
+                  <span className="text-white/40">,</span>
+                  <a href="tel:8810600135" className="hover:text-accent transition-colors">8810600135</a>
+                </div>
               </div>
               <div>
                 <strong className="block text-white mb-1">Location</strong>
-                Mumbai, India
+                Noida Sector 63, India
               </div>
             </div>
             

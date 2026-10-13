@@ -42,9 +42,16 @@ export function Footer() {
           <div>
             <h4 className="font-bold mb-6">Contact Us</h4>
             <ul className="space-y-3 text-white/70">
-              <li>contact@whitecoatclub.com</li>
-              <li>+91 98765 43210</li>
-              <li>Mumbai, India</li>
+              <li>
+                <a href="mailto:marketing@f2fintech.com" className="hover:text-white transition-colors">
+                  marketing@f2fintech.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:8981635694" className="hover:text-white transition-colors">8981635694</a>,{" "}
+                <a href="tel:8810600135" className="hover:text-white transition-colors">8810600135</a>
+              </li>
+              <li>Noida Sector 63, India</li>
             </ul>
           </div>
         </div>

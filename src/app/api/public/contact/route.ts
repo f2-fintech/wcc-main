@@ -40,7 +40,7 @@ export async function POST(request: Request) {
             <p style="font-size: 13px; color: #9ca3af; margin: 0;">
               Warm regards,<br />
               <strong style="color: #0A192F;">White Coat Club Team</strong><br />
-              Mumbai, India &bull; <a href="mailto:contact@whitecoatclub.com" style="color: #C5A880; text-decoration: none;">contact@whitecoatclub.com</a>
+              Noida Sector 63, India &bull; <a href="mailto:marketing@f2fintech.com" style="color: #C5A880; text-decoration: none;">marketing@f2fintech.com</a>
             </p>
           </div>
         `,
