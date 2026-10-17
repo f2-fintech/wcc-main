@@ -7,8 +7,8 @@ export async function GET(request: Request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '12');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '9') || 9));
     const search = searchParams.get('search') || '';
     const specialization = searchParams.get('specialization') || '';
     const city = searchParams.get('city') || '';
@@ -38,7 +38,8 @@ export async function GET(request: Request) {
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit),
+        pages: Math.max(1, Math.ceil(total / limit)),
+        limit,
       },
     });
   } catch (error: any) {

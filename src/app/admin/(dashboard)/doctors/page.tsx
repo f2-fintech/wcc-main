@@ -18,7 +18,7 @@ export default function DoctorsAdmin() {
   const [formData, setFormData] = useState({
     name: "", slug: "", photoUrl: "", specialization: "", qualifications: "",
     hospital: "", city: "", state: "", experienceYears: 0, bio: "",
-    email: "", phone: "", socialLinks: { linkedin: "" }, isPublished: false
+    email: "", phone: "", socialLinks: { linkedin: "" }, focalPoint: { x: 50, y: 15 }, isPublished: false
   });
 
   const fetchDoctors = async () => {
@@ -37,14 +37,15 @@ export default function DoctorsAdmin() {
       setFormData({
         ...doc,
         experienceYears: doc.experienceYears || 0,
-        socialLinks: doc.socialLinks || { linkedin: "" }
+        socialLinks: doc.socialLinks || { linkedin: "" },
+        focalPoint: doc.focalPoint || { x: 50, y: 15 }
       });
     } else {
       setEditingDoctor(null);
       setFormData({
         name: "", slug: "", photoUrl: "", specialization: "", qualifications: "",
         hospital: "", city: "", state: "", experienceYears: 0, bio: "",
-        email: "", phone: "", socialLinks: { linkedin: "" }, isPublished: false
+        email: "", phone: "", socialLinks: { linkedin: "" }, focalPoint: { x: 50, y: 15 }, isPublished: false
       });
     }
     setIsModalOpen(true);
@@ -73,7 +74,13 @@ export default function DoctorsAdmin() {
     try {
       const res = await fetch("/api/admin/upload", { method: "POST", body: uploadData });
       const result = await res.json();
-      if (result.success) setFormData({ ...formData, photoUrl: result.url });
+      if (result.success) {
+        setFormData((prev) => ({
+          ...prev,
+          photoUrl: result.url,
+          focalPoint: result.focalPoint || { x: 50, y: 15 },
+        }));
+      }
     } catch (err) {
       alert("Image upload failed.");
     } finally {
@@ -197,18 +204,85 @@ export default function DoctorsAdmin() {
         <h2 className="text-2xl font-serif mb-6">{editingDoctor ? "Edit Doctor" : "Add Doctor"}</h2>
         <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
           
-          <div className="flex items-center gap-4 mb-4">
-            {formData.photoUrl ? (
-               <img src={formData.photoUrl} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
-            ) : (
-               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                 <ImageIcon />
-               </div>
-            )}
-            <div>
-              <Label htmlFor="photo" className="block mb-2">Profile Photo (Optional)</Label>
-              <Input id="photo" type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl mb-4 space-y-3">
+            <div className="flex items-center gap-4">
+              {formData.photoUrl ? (
+                <div className="w-20 h-24 rounded-lg overflow-hidden border border-gray-300 shadow-sm relative shrink-0 bg-gray-100">
+                  <img
+                    src={formData.photoUrl}
+                    alt="Preview"
+                    style={{
+                      objectPosition: `${formData.focalPoint?.x ?? 50}% ${formData.focalPoint?.y ?? 15}%`
+                    }}
+                    className="w-full h-full object-cover transition-[object-position] duration-200"
+                  />
+                  <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[9px] text-white text-center py-0.5">Card Preview</span>
+                </div>
+              ) : (
+                <div className="w-20 h-24 rounded-lg bg-gray-100 border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 shrink-0">
+                  <ImageIcon className="w-6 h-6 mb-1" />
+                  <span className="text-[10px]">No Photo</span>
+                </div>
+              )}
+              <div className="flex-1">
+                <Label htmlFor="photo" className="block mb-1 text-sm font-medium">Profile Photo (Automatic Face Focus)</Label>
+                <p className="text-xs text-gray-500 mb-2">Photo upload hote hi system automatically face detect karke perfect framing set kar dega.</p>
+                <Input id="photo" type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+              </div>
             </div>
+
+            {formData.photoUrl && (
+              <div className="pt-2 border-t border-gray-200">
+                <div className="flex items-center justify-between text-xs text-gray-600 mb-1.5">
+                  <span className="font-medium">Card Vertical Framing (Focus):</span>
+                  <span className="text-primary font-semibold">
+                    {(formData.focalPoint?.y ?? 15) <= 5 ? "Top of photo (0%)" : (formData.focalPoint?.y ?? 15) <= 15 ? "Near-top (10%)" : (formData.focalPoint?.y ?? 15) <= 25 ? "Standard (20%)" : "Middle / Headroom (30%)"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-gray-400">Top Face</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="35"
+                    step="1"
+                    value={formData.focalPoint?.y ?? 15}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setFormData((prev) => ({
+                        ...prev,
+                        focalPoint: { x: prev.focalPoint?.x ?? 50, y: val }
+                      }));
+                    }}
+                    className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                  <span className="text-[11px] text-gray-400">Headroom</span>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, focalPoint: { x: 50, y: 0 } }))}
+                    className={`text-[11px] px-2.5 py-1 rounded-md border ${(formData.focalPoint?.y ?? 15) === 0 ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                  >
+                    Top (Face at very top)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, focalPoint: { x: 50, y: 12 } }))}
+                    className={`text-[11px] px-2.5 py-1 rounded-md border ${(formData.focalPoint?.y ?? 15) === 12 ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                  >
+                    Standard (Default)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, focalPoint: { x: 50, y: 28 } }))}
+                    className={`text-[11px] px-2.5 py-1 rounded-md border ${(formData.focalPoint?.y ?? 15) === 28 ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                  >
+                    Middle (High Headroom)
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

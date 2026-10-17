@@ -1,4 +1,12 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Fix querySrv ECONNREFUSED issues on local networks/ISPs that fail to resolve SRV records
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // Ignore in environments where setting DNS servers is not allowed
+}
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -29,9 +37,15 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI!, opts)
+      .then((mongoose) => {
+        return mongoose;
+      })
+      .catch((err) => {
+        cached.promise = null;
+        throw err;
+      });
   }
   cached.conn = await cached.promise;
   return cached.conn;

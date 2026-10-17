@@ -58,9 +58,9 @@ export function HeroSection() {
         <Activity size={70} />
       </motion.div>
 
-      <div className="container mx-auto px-4 md:px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* Left Content */}
-        <div className="flex flex-col items-start text-left">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        {/* Left Content (Order 2 on mobile, Order 1 on desktop) */}
+        <div className="flex flex-col items-start text-left order-2 lg:order-1">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -115,67 +115,162 @@ export function HeroSection() {
           </motion.div>
         </div>
 
-        {/* Right Image Composition */}
-        <motion.div
-          className="relative mt-12 lg:mt-0 lg:ml-8"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: -3 }}
-            transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 overflow-hidden shadow-2xl border-4 lg:border-8 border-white w-full max-w-[640px] mx-auto transition-transform duration-700 hover:scale-105 aspect-[4/3] rounded-3xl lg:aspect-[1.1/1] lg:[border-radius:40%_60%_70%_30%/40%_50%_60%_50%]"
-          >
-            {/* Carousel Images */}
-            <AnimatePresence>
-              {HERO_IMAGES.map((src, index) => (
-                index === currentImageIndex && (
-                  <motion.img
-                    key={src}
-                    src={src}
-                    alt={`White Coat Club Event ${index + 1}`}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: "easeInOut" }}
-                  />
-                )
-              ))}
-            </AnimatePresence>
+        {/* Image Composition (Order 1 on mobile, Order 2 on desktop) */}
+        <div className="relative order-1 lg:order-2 w-full lg:mt-0 lg:ml-8">
 
-            {/* Subtle gradient just for the dots visibility */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 lg:h-32 bg-gradient-to-t from-black/40 to-transparent z-[5] pointer-events-none" />
-
-            {/* Carousel Dots inside the shape */}
-            <div className="absolute bottom-6 lg:bottom-8 left-0 right-0 z-20 flex justify-center gap-2">
-              {HERO_IMAGES.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentImageIndex(i)}
-                  className={`h-2 rounded-full transition-all duration-300 shadow-sm ${i === currentImageIndex
-                      ? "bg-white w-6"
-                      : "bg-white/60 w-2 hover:bg-white"
-                    }`}
-                  aria-label={`Go to slide ${i + 1}`}
+          {/* ===================================================================
+              MOBILE-ONLY STACKED PHOTO DECK (Realistic Physical Photo Stack)
+              =================================================================== */}
+          <div className="block lg:hidden w-full max-w-[420px] sm:max-w-[480px] mx-auto mb-10 select-none px-2 sm:px-0">
+            {/* Aspect container with padding so rotated cards are never clipped */}
+            <div
+              className="relative w-full aspect-[4/3] cursor-pointer"
+              onClick={() => setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length)}
+              title="Tap to see next photo"
+            >
+              {/* Card 3: Deep Background Layer (Tilted slight left) */}
+              <div
+                className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border-4 border-white shadow-md bg-slate-200 transition-transform duration-500 pointer-events-none"
+                style={{
+                  transform: "rotate(-1.5deg) translateY(8px) scale(0.92)",
+                  zIndex: 1,
+                }}
+              >
+                <img
+                  src={HERO_IMAGES[(currentImageIndex + 2) % HERO_IMAGES.length]}
+                  alt="Event preview"
+                  className="w-full h-full object-cover brightness-[0.88]"
                 />
-              ))}
-            </div>
-          </motion.div>
+              </div>
 
-          {/* Decorative image accent - Hidden on mobile, shifted left on desktop */}
-          <motion.div
-            initial={{ opacity: 0, x: 50, rotate: 20 }}
-            animate={{ opacity: 1, x: 0, rotate: 6 }}
-            transition={{ duration: 1.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute hidden lg:block -bottom-16 -left-48 w-64 h-64 overflow-hidden shadow-xl border-4 border-white z-20 [border-radius:60%_40%_30%_70%/60%_30%_70%_40%]"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&q=80&w=400"
-              alt="Medical stethoscope"
-              className="w-full h-full object-cover scale-110"
-            />
-          </motion.div>
-        </motion.div>
+              {/* Card 2: Middle Layer (Tilted OPPOSITE RIGHT, clearly peeking out) */}
+              <div
+                className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border-4 border-white shadow-xl bg-slate-100 transition-transform duration-500 pointer-events-none"
+                style={{
+                  transform: "rotate(4.5deg) translateY(4px) translateX(6px) scale(0.96)",
+                  zIndex: 2,
+                }}
+              >
+                <img
+                  src={HERO_IMAGES[(currentImageIndex + 1) % HERO_IMAGES.length]}
+                  alt="Next event"
+                  className="w-full h-full object-cover brightness-[0.94]"
+                />
+              </div>
+
+              {/* Card 1: Top Active Layer (Tilted LEFT, Lifts up & Swipes away on change) */}
+              <div className="absolute inset-0 w-full h-full" style={{ zIndex: 10 }}>
+                <AnimatePresence mode="popLayout">
+                  <motion.div
+                    key={currentImageIndex}
+                    initial={{ opacity: 0.9, scale: 0.96, rotate: 4.5, y: 4, x: 6 }}
+                    animate={{ opacity: 1, scale: 1, rotate: -3, y: 0, x: 0 }}
+                    exit={{
+                      x: -340,
+                      y: -35,
+                      rotate: -18,
+                      opacity: 0,
+                      scale: 0.9,
+                      transition: { duration: 0.6, ease: [0.32, 0.72, 0, 1] }
+                    }}
+                    transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full h-full rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-slate-900 relative"
+                  >
+                    <img
+                      src={HERO_IMAGES[currentImageIndex]}
+                      alt={`White Coat Club Event ${currentImageIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Gradient overlay for indicator visibility */}
+                    <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />
+
+                    {/* Subtle "Tap to swipe" hint */}
+                    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/20 flex items-center gap-1 shadow-sm">
+                      <span>Tap to swipe</span>
+                    </div>
+
+                    {/* Carousel Dots inside top card */}
+                    <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 z-20">
+                      {HERO_IMAGES.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            i === currentImageIndex ? "bg-white w-5" : "bg-white/50 w-1.5"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================================================================
+              DESKTOP-ONLY IMAGE COMPOSITION (Original Organic Morphing Blob)
+              =================================================================== */}
+          <div className="hidden lg:block relative">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+              animate={{ opacity: 1, scale: 1, rotate: -3 }}
+              transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 overflow-hidden shadow-2xl border-8 border-white w-full max-w-[640px] mx-auto transition-transform duration-700 hover:scale-105 aspect-[1.1/1] [border-radius:40%_60%_70%_30%/40%_50%_60%_50%]"
+            >
+              {/* Carousel Images */}
+              <AnimatePresence>
+                {HERO_IMAGES.map((src, index) => (
+                  index === currentImageIndex && (
+                    <motion.img
+                      key={src}
+                      src={src}
+                      alt={`White Coat Club Event ${index + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0, scale: 1.05 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    />
+                  )
+                ))}
+              </AnimatePresence>
+
+              {/* Subtle gradient just for the dots visibility */}
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent z-[5] pointer-events-none" />
+
+              {/* Carousel Dots inside the shape */}
+              <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-2">
+                {HERO_IMAGES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentImageIndex(i)}
+                    className={`h-2 rounded-full transition-all duration-300 shadow-sm ${
+                      i === currentImageIndex
+                        ? "bg-white w-6"
+                        : "bg-white/60 w-2 hover:bg-white"
+                    }`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Decorative image accent - shifted left on desktop */}
+            <motion.div
+              initial={{ opacity: 0, x: 50, rotate: 20 }}
+              animate={{ opacity: 1, x: 0, rotate: 6 }}
+              transition={{ duration: 1.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute -bottom-16 -left-48 w-64 h-64 overflow-hidden shadow-xl border-4 border-white z-20 [border-radius:60%_40%_30%_70%/60%_30%_70%_40%]"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&q=80&w=400"
+                alt="Medical stethoscope"
+                className="w-full h-full object-cover scale-110"
+              />
+            </motion.div>
+          </div>
+
+        </div>
       </div>
     </section>
   );

@@ -16,6 +16,10 @@ export interface IDoctor extends Document {
   socialLinks?: {
     linkedin?: string;
   };
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -37,6 +41,10 @@ const DoctorSchema: Schema = new Schema(
     phone: { type: String, default: "" },
     socialLinks: {
       linkedin: { type: String, default: "" },
+    },
+    focalPoint: {
+      x: { type: Number, default: 50 },
+      y: { type: Number, default: 15 },
     },
     isPublished: { type: Boolean, default: false },
   },
