@@ -64,3 +64,8 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+export async function getAdminSession() {
+  const { getServerSession } = await import('next-auth');
+  return await getServerSession(authOptions);
+}

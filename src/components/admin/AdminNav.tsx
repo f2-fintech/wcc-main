@@ -12,6 +12,7 @@ import {
   UserCheck, 
   Calendar, 
   Megaphone, 
+  LayoutList,
   LogOut 
 } from "lucide-react";
 
@@ -33,6 +34,7 @@ const navItems: NavItem[] = [
   { href: "/admin/doctors", label: "Doctors", icon: Users },
   { href: "/admin/requests", label: "Join Requests", icon: UserCheck },
   { href: "/admin/events", label: "Events", icon: Calendar },
+  { href: "/admin/features", label: "Features", icon: LayoutList },
   { href: "/admin/marketing-team", label: "Marketing Team", icon: Megaphone },
 ];
 

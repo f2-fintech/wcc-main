@@ -3,9 +3,20 @@ import dbConnect from '@/lib/db';
 import { JoinRequest } from '@/models/JoinRequest';
 import { joinFormSchema } from '@/validators';
 import { sendEmail } from '@/lib/mailer';
+import { escapeHtml } from '@/lib/utils';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`join_${ip}`, 5, 60 * 1000);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests. Please wait a moment before trying again.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const validatedData = joinFormSchema.parse(body);
 
@@ -20,20 +31,26 @@ export async function POST(request: Request) {
     // Create join request
     const joinRequest = await JoinRequest.create(validatedData);
 
+    const safeName = escapeHtml(validatedData.name);
+
     // Send confirmation email to the user
-    await sendEmail({
-      to: validatedData.email,
-      subject: 'Welcome to White Coat Club',
-      html: `
-        <h2>Welcome to White Coat Club!</h2>
-        <p>Dear Dr. ${validatedData.name},</p>
-        <p>Thank you for your interest in joining the White Coat Club. We have received your details and our team will review your application shortly.</p>
-        <p>It's free. It's for doctors. And it's built around you.</p>
-        <br/>
-        <p>Best regards,</p>
-        <p>The White Coat Club Team</p>
-      `,
-    });
+    try {
+      await sendEmail({
+        to: validatedData.email,
+        subject: 'Welcome to White Coat Club',
+        html: `
+          <h2>Welcome to White Coat Club!</h2>
+          <p>Dear Dr. ${safeName},</p>
+          <p>Thank you for your interest in joining the White Coat Club. We have received your details and our team will review your application shortly.</p>
+          <p>It's free. It's for doctors. And it's built around you.</p>
+          <br/>
+          <p>Best regards,</p>
+          <p>The White Coat Club Team</p>
+        `,
+      });
+    } catch (mailError) {
+      console.error('Failed to send join confirmation email:', mailError);
+    }
 
     return NextResponse.json({ success: true, data: joinRequest }, { status: 201 });
   } catch (error: any) {

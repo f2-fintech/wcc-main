@@ -3,12 +3,22 @@ import dbConnect from '@/lib/db';
 import { Event } from '@/models/Event';
 import { EventRegistration } from '@/models/EventRegistration';
 import { eventRegistrationSchema } from '@/validators';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`event_reg_${ip}`, 10, 60 * 1000);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests. Please wait a moment before trying again.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     
     // Validate request body

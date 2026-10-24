@@ -15,6 +15,8 @@ cp .env.example .env.local
 ```
 - `MONGODB_URI`: Your MongoDB connection string.
 - `NEXTAUTH_SECRET`: Generate a random string (e.g. `openssl rand -base64 32`).
+- `ADMIN_EMAIL`: Your initial admin user email address.
+- `ADMIN_PASSWORD`: Your secure initial admin password (minimum 8 characters).
 - `AWS_*`: Your AWS S3 bucket credentials for image uploads.
 - `EMAIL_SERVER_*`: Your Nodemailer SMTP credentials (e.g. Gmail App Password).
 
@@ -25,13 +27,14 @@ npm install
 ```
 
 ### 4. Seed the Database
-Run the seed script to create your first Admin user:
+Ensure `ADMIN_EMAIL` and `ADMIN_PASSWORD` are set in `.env.local`, then run:
 ```bash
 npm run seed:admin
 ```
-This will create:
-- **Email:** `admin@whitecoatclub.com`
-- **Password:** `admin123`
+To update an existing admin password:
+```bash
+node scripts/seedAdmin.js --update
+```
 
 ### 5. Run the Application
 ```bash
