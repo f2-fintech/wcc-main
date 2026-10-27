@@ -336,8 +336,6 @@ export function FeaturesSection() {
                 <span className="text-accent">•</span>
                 <span>Interactive discussions</span>
                 <span className="text-accent">•</span>
-                <span>Food &amp; refreshments</span>
-                <span className="text-accent">•</span>
                 <span>New connections</span>
                 <span className="text-accent">•</span>
                 <span>Good conversations</span>
