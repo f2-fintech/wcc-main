@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { motion, AnimatePresence, useScroll } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValue, useSpring } from "framer-motion";
 
 // ─── Fallback data (used until DB loads) ─────────────────────────────────────
 const FALLBACK_FEATURES = [
@@ -47,17 +47,28 @@ const FALLBACK_FEATURES = [
   },
 ];
 
-// ─── Helper: shortest circular distance ─────────────────────────────────────
-function angularDistance(a: number, b: number, total: number): number {
-  const diff = Math.abs(a - b);
-  return Math.min(diff, total - diff);
-}
+
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 export function FeaturesSection() {
   const [features, setFeatures] = useState<any[]>(FALLBACK_FEATURES);
+  // activeIndex is only for text/dot display — derived from continuous spring pos
   const [activeIndex, setActiveIndex] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  // Continuous fractional position (0 … total-1), driven directly by scroll
+  const continuousPos = useMotionValue(0);
+  // Spring-smoothed version — drives actual card positions on every frame
+  const smoothPos = useSpring(continuousPos, {
+    stiffness: 80,
+    damping: 22,
+    mass: 0.6,
+  });
+
+  // Per-card computed positions updated on every spring tick
+  const [cardPositions, setCardPositions] = useState<
+    Array<{ x: number; y: number; scale: number; opacity: number; zIndex: number }>
+  >([]);
 
   // Responsive dimensions for cards & orbit ellipse
   const [dimensions, setDimensions] = useState({
@@ -95,25 +106,67 @@ export function FeaturesSection() {
       .catch(() => {});
   }, []);
 
-  // ─── Responsive Scroll Progress ──────────────────────────────────────────
-  // Track scroll inside the sectionRef
+  // ─── Scroll → continuous fractional position ────────────────────────────
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
 
+  // Map raw scroll to continuousPos; update text index as nearest integer
   useEffect(() => {
     const total = features.length;
     if (total === 0) return;
 
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      // Map scroll progress (0..1) directly to indices with smooth distribution
-      const rawIdx = Math.floor(v * total);
-      const idx = Math.min(total - 1, Math.max(0, rawIdx));
-      setActiveIndex(idx);
+    const unsub = scrollYProgress.on("change", (v) => {
+      // No Math.floor — purely continuous 0 → (total-1)
+      const rawPos = v * (total - 1);
+      continuousPos.set(rawPos);
+      const nearest = Math.min(total - 1, Math.max(0, Math.round(rawPos)));
+      setActiveIndex(nearest);
     });
-    return unsubscribe;
-  }, [scrollYProgress, features.length]);
+    return unsub;
+  }, [scrollYProgress, features.length, continuousPos]);
+
+  // Recompute card positions on every spring frame tick
+  useEffect(() => {
+    const total = features.length;
+    if (total === 0) return;
+
+    const compute = (pos: number) => {
+      const angleStep = -(2 * Math.PI) / total;
+      return features.map((_, index) => {
+        // Fractional angle — continuous, no snapping
+        const angle = (index - pos) * angleStep + Math.PI / 2;
+        const x = Math.cos(angle) * dimensions.radiusX;
+        const y = -(1 - Math.sin(angle)) * dimensions.radiusY;
+
+        // Fractional circular distance to front position
+        const raw = ((index - pos) % total + total) % total;
+        const fractionalDist = raw > total / 2 ? total - raw : raw;
+
+        const scale =
+          fractionalDist < 0.5
+            ? 1.15 - fractionalDist * 0.3
+            : Math.max(0.62, 0.78 - (fractionalDist - 0.5) * 0.16);
+        const opacity =
+          fractionalDist < 0.5
+            ? 1 - fractionalDist * 0.4
+            : Math.max(0.2, 0.6 - fractionalDist * 0.12);
+        const zIndex = Math.round(30 - fractionalDist * 5);
+
+        return { x, y, scale, opacity, zIndex };
+      });
+    };
+
+    // Seed initial positions
+    setCardPositions(compute(smoothPos.get()));
+
+    // Update on every spring frame
+    const unsub = smoothPos.on("change", (pos) => {
+      setCardPositions(compute(pos));
+    });
+    return unsub;
+  }, [smoothPos, features, dimensions]);
 
   const total = features.length;
 
@@ -173,30 +226,18 @@ export function FeaturesSection() {
             }}
           />
 
-          {/* ── Orbiting cards ────────────────────────────────────────── */}
+          {/* ── Orbiting cards — positions driven by spring on every frame ── */}
           {features.map((feature, index) => {
-            // Anti-clockwise step
-            const angleStep = -(2 * Math.PI) / total;
-            // Angle formula: active card sits at front center (Math.PI / 2)
-            const angle = (index - activeIndex) * angleStep + Math.PI / 2;
-
-            // Coordinates on ellipse
-            const x = Math.cos(angle) * dimensions.radiusX;
-            // Active card at y = 0; inactive cards recede gently upwards (negative y)
-            const y = -(1 - Math.sin(angle)) * dimensions.radiusY;
-
+            const pos = cardPositions[index] ?? { x: 0, y: 0, scale: 1, opacity: 1, zIndex: 10 };
             const isActive = index === activeIndex;
-            const dist = angularDistance(index, activeIndex, total);
-
-            // Larger cards, smooth scaling & opacity
-            const scale = isActive ? 1.15 : Math.max(0.62, 0.78 - dist * 0.08);
-            const opacity = isActive ? 1 : Math.max(0.2, 0.5 - dist * 0.12);
-            const zIndex = isActive ? 30 : Math.max(1, 20 - dist * 4);
 
             return (
-              <motion.div
+              <div
                 key={feature._id ?? index}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => {
+                  continuousPos.set(index);
+                  setActiveIndex(index);
+                }}
                 style={{
                   position: "absolute",
                   left: "50%",
@@ -206,22 +247,15 @@ export function FeaturesSection() {
                   marginLeft: -(dimensions.cardW / 2),
                   marginTop: -(dimensions.cardH / 2),
                   cursor: isActive ? "default" : "pointer",
-                  zIndex,
+                  zIndex: pos.zIndex,
+                  // Spring drives transform directly — no CSS transition lag
+                  transform: `translate(${pos.x}px, ${pos.y}px) scale(${pos.scale})`,
+                  opacity: pos.opacity,
                   willChange: "transform, opacity",
-                }}
-                animate={{
-                  x,
-                  y,
-                  scale,
-                  opacity,
-                }}
-                transition={{
-                  duration: 0.45,
-                  ease: [0.22, 1, 0.36, 1], // Smooth cubic-bezier without sluggish physics lag
                 }}
               >
                 <div
-                  className="w-full h-full rounded-2xl overflow-hidden transition-all duration-500"
+                  className="w-full h-full rounded-2xl overflow-hidden"
                   style={{
                     border: isActive
                       ? "2px solid rgba(197,168,128,0.85)"
@@ -229,32 +263,34 @@ export function FeaturesSection() {
                     boxShadow: isActive
                       ? "0 0 50px 8px rgba(197,168,128,0.28), 0 24px 70px rgba(0,0,0,0.7)"
                       : "0 8px 25px rgba(0,0,0,0.35)",
+                    transition: "border 0.3s, box-shadow 0.3s",
                   }}
                 >
-                  {/* Card image container */}
                   <div className="w-full h-full relative overflow-hidden bg-black/40">
                     <img
                       src={feature.imageUrl}
                       alt={feature.title}
                       loading="eager"
                       decoding="async"
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out"
+                      className="w-full h-full object-cover"
                       style={{
                         transform: isActive ? "scale(1.04)" : "scale(1)",
+                        transition: "transform 0.7s ease-out",
                       }}
                     />
 
-                    {/* Gradient overlay on image */}
+                    {/* Gradient overlay */}
                     <div
-                      className="absolute inset-0 transition-opacity duration-300"
+                      className="absolute inset-0"
                       style={{
                         background: isActive
                           ? "linear-gradient(to top, rgba(10,25,47,0.75) 0%, transparent 60%)"
                           : "rgba(10,25,47,0.45)",
+                        transition: "background 0.3s",
                       }}
                     />
 
-                    {/* Title label badge on bottom of active card */}
+                    {/* Title badge on active card */}
                     {isActive && (
                       <motion.div
                         initial={{ opacity: 0, y: 8 }}
@@ -269,7 +305,7 @@ export function FeaturesSection() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
 
@@ -295,14 +331,17 @@ export function FeaturesSection() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Dot indicators for quick click / touch navigation */}
+            {/* Dot indicators — click sets continuousPos so spring animates */}
             <div className="flex gap-2.5 justify-center mt-4">
               {features.map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   aria-label={`Go to feature ${i + 1}`}
-                  onClick={() => setActiveIndex(i)}
+                  onClick={() => {
+                    continuousPos.set(i);
+                    setActiveIndex(i);
+                  }}
                   className="transition-all duration-300 rounded-full cursor-pointer hover:opacity-100"
                   style={{
                     width: i === activeIndex ? 26 : 8,
